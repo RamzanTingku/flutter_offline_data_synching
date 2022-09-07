@@ -15,7 +15,9 @@ class BoxInstances{
   Box<GithubUser>? githubUserBox;
 
   void closeBoxes(){
-    githubRepoBox?.compact();
+    // githubRepoBox?.compact();
     githubRepoBox?.close();
+    githubUserBox?.close();
+    Hive.close();
   }
 }

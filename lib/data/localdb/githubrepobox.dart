@@ -7,9 +7,9 @@ class GithubRepoBox extends BaseBox<GithubRepos>{
   static const boxName = "github_repo";
   @override
   Future<void> initHiveAdapters() async {
-    Hive.registerAdapter(ItemsAdapter());
-    Hive.registerAdapter(OwnerAdapter());
-    Hive.registerAdapter(GithubReposAdapter());
+    if(!Hive.isAdapterRegistered(ItemsAdapter().typeId)) Hive.registerAdapter(ItemsAdapter());
+    if(!Hive.isAdapterRegistered(OwnerAdapter().typeId)) Hive.registerAdapter(OwnerAdapter());
+    if(!Hive.isAdapterRegistered(GithubReposAdapter().typeId)) Hive.registerAdapter(GithubReposAdapter());
     await Hive.openBox<GithubRepos>(boxName);
     BoxInstances().githubRepoBox =  Hive.box<GithubRepos>(boxName);
   }
@@ -19,11 +19,4 @@ class GithubRepoBox extends BaseBox<GithubRepos>{
     if(BoxInstances().githubRepoBox == null) await initHiveAdapters();
     return BoxInstances().githubRepoBox!;
   }
-
-  @override
-  Box<GithubRepos> getBoxesSynchronous() {
-    // TODO: implement getBoxesSynchronous
-    throw UnimplementedError();
-  }
-
 }

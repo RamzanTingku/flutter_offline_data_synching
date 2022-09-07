@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
@@ -11,12 +9,9 @@ import 'package:flutter_offline_data_synching/data/model/githubuser/github_user.
 import 'package:flutter_offline_data_synching/data/remotedb/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
 import 'package:flutter_offline_data_synching/worker/BackgroundService.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
+
+import 'data/localdb/githubuserbox.dart';
 
 const String TAG = "BackGround_Work";
 
@@ -24,21 +19,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
   await BoxInstances().initHive();
+  await BackgroundService.instance.init();
+  runApp(const MyApp());
+}
 
+Future<List<GithubRepos>> saveGithubRepoDataFromServer() async {
   var repos = await Repository.getGithubRepos();
   await GithubRepoBox().add(repos);
-  var repoFromLocal = await GithubRepoBox().getAllData();
-  await GithubRepoBox().deleteAll();
-  print(repoFromLocal.toString());
+  return await GithubRepoBox().getAllData();
+}
 
-  //var user = await Repository.getGithubUser();
-  //await GithubUserBox().add(user);
-  //var userFromLocal = await GithubUserBox().getAllData();
-  //await GithubUserBox().deleteAll();
-  //print(userFromLocal.toString());
-  //var dummyData = GithubRepos(totalCount: 100, incompleteResults: false, items: null);
-  //await GithubRepoBox().update(dummyData);
-  runApp(const MyApp());
+Future<List<GithubUser>> saveGithubUserDataFromServer() async {
+  var user = await Repository.getGithubUser();
+  await GithubUserBox().add(user);
+  return await GithubUserBox().getAllData();
 }
 
 class MyApp extends StatelessWidget {
@@ -65,7 +59,8 @@ class BackGroundWorkSample extends StatefulWidget {
 }
 
 class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
-  int _counterValue = 0;
+  int _serverValue = 0;
+  int _prefValue = 0;
   late StreamSubscription _loginSubscription;
 
   @override
@@ -78,8 +73,8 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   }
 
   void loadData() async {
-    _counterValue =
-    await BackGroundWork.instance.getBackGroundCounterValue();
+    _prefValue = await BackGroundWork.instance.getPrefData();
+    _serverValue = await GithubUserBox().getAllData().then((value) => value.length);
     setState(() {});
   }
 
@@ -99,18 +94,16 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ValueListenableBuilder<Box<GithubRepos>>(
+              Text("Pref value: $_prefValue   ServerData length: $_serverValue",),
+              /*ValueListenableBuilder<Box<GithubRepos>>(
                 valueListenable: BoxInstances().githubRepoBox!.listenable(),
                 builder: (context, box, _) {
                   final storages = box.values.toList().cast<GithubRepos>();
                   return buildContent(storages);
                 },
-              ),
+              ),*/
               ElevatedButton(onPressed: () async {
-                var repos = await Repository.getGithubRepos();
-                await GithubRepoBox().add(repos);
-                var repoFromLocal = await GithubRepoBox().getAllData();
-                print(repoFromLocal.toString());
+                loadData();
               }, child: const Text("Fetch"),)
             ],
           ),

@@ -55,12 +55,11 @@ class NotificationService {
     return log("PAYLOAD: $payload");
   }
 
-  Future showNotification(int id, String data) async {
+  Future showNotification(int prefValue, int serverValue) async {
     return await flutterLocalNotificationsPlugin.show(
-        id,
+        0,
         "Notification from Work manage",
-        "Got $data from worker",
-        platformChannelSpecifics,
-        payload: data);
+        "Pref value: $prefValue   ServerData length: $serverValue",
+        platformChannelSpecifics);
   }
 }

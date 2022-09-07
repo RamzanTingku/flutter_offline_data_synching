@@ -1,4 +1,7 @@
+import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
+import 'package:flutter_offline_data_synching/data/remotedb/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
+import 'package:flutter_offline_data_synching/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -12,13 +15,19 @@ class BackgroundService {
     await Workmanager().initialize(callbackDispatcher);
   }
 
-  void callbackDispatcher() {
+  static void callbackDispatcher() {
     Workmanager().executeTask((task, inputData) async {
-      int value = await BackGroundWork.instance.getBackGroundCounterValue();
-      int updatedValue = value + 1;
-      BackGroundWork.instance.loadCounterValue(updatedValue);
+      //get data
+      var serverDataCount = await saveGithubRepoDataFromServer();
+
+      //set count to pref
+      int prefValue = await BackGroundWork.instance.getPrefData();
+      await BackGroundWork.instance.savePrefData(prefValue+1);
+      int updatedPrefValue = await BackGroundWork.instance.getPrefData();
+
+      //show count to notification
       NotificationService()
-          .showNotification(updatedValue, updatedValue.toString());
+          .showNotification(updatedPrefValue, serverDataCount.length);
       return Future.value(true);
     });
   }
@@ -31,12 +40,12 @@ class BackGroundWork {
 
   static BackGroundWork get instance => _instance;
 
-  loadCounterValue(int value) async {
+  Future<bool> savePrefData(int value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('BackGroundCounterValue', value);
+    return await prefs.setInt('BackGroundCounterValue', value);
   }
 
-  Future<int> getBackGroundCounterValue() async {
+  Future<int> getPrefData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //Return bool
     int counterValue = prefs.getInt('BackGroundCounterValue') ?? 0;

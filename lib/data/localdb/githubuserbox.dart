@@ -7,8 +7,8 @@ class GithubUserBox extends BaseBox<GithubUser>{
   static const boxName = "github_user";
   @override
   Future<void> initHiveAdapters() async {
-    Hive.registerAdapter(ItemsAdapter());
-    Hive.registerAdapter(GithubUserAdapter());
+    if(!Hive.isAdapterRegistered(ItemsAdapter().typeId)) Hive.registerAdapter(ItemsAdapter());
+    if(!Hive.isAdapterRegistered(GithubUserAdapter().typeId)) Hive.registerAdapter(GithubUserAdapter());
     await Hive.openBox<GithubUser>(boxName);
     BoxInstances().githubUserBox =  Hive.box<GithubUser>(boxName);
   }
