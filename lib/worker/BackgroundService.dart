@@ -13,7 +13,6 @@ class BackgroundService {
   static BackgroundService get instance => _instance;
 
   Future<void> init() async {
-    await Workmanager().cancelAll();
     await Workmanager().initialize(callbackDispatcher);
   }
 }

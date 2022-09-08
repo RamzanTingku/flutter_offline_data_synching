@@ -59,6 +59,7 @@ class ItemsAdapter extends TypeAdapter<Items> {
     return Items(
       id: fields[0] as int?,
       name: fields[1] as String?,
+      timeStamp: fields[3] as String?,
       owner: fields[2] as Owner?,
     );
   }
@@ -66,13 +67,15 @@ class ItemsAdapter extends TypeAdapter<Items> {
   @override
   void write(BinaryWriter writer, Items obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.owner);
+      ..write(obj.owner)
+      ..writeByte(3)
+      ..write(obj.timeStamp);
   }
 
   @override

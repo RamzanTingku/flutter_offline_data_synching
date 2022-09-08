@@ -55,16 +55,19 @@ class Items  extends HiveObject{
   String? name;
   @HiveField(2)
   Owner? owner;
-  @HiveField(5)
+  @HiveField(3)
+  String? timeStamp;
 
   Items(
       {this.id,
         this.name,
+        this.timeStamp,
         this.owner});
 
   Items.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    timeStamp =  DateTime.now().toString();
     owner = json['owner'] != null ? Owner.fromJson(json['owner']) : null;
   }
 

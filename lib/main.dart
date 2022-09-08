@@ -62,7 +62,7 @@ class BackGroundWorkSample extends StatefulWidget {
 }
 
 class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
-  int _serverValue = 0;
+  List<GithubRepos> _serverData = [];
   int _prefValue = 0;
   late StreamSubscription _loginSubscription;
 
@@ -76,18 +76,20 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     _prefValue = await BackGroundWork.instance.getPrefData();
-    _serverValue = await GithubRepoBox().getAllData().then((value) => value.length);
+    _serverData = await GithubRepoBox().getAllData();
     setState(() {});
   }
 
   Future<void> triggerOneOffTask() async {
     Workmanager().registerOneOffTask("simpleOneOffTask", "simpleOneOffTask",
-        existingWorkPolicy: ExistingWorkPolicy.replace);
+        existingWorkPolicy: ExistingWorkPolicy.append);
   }
 
   Future<void> triggerPeriodicTask() async {
     Workmanager().registerPeriodicTask("simplePeriodicTask", "simplePeriodicTask",
-        existingWorkPolicy: ExistingWorkPolicy.replace);
+        initialDelay: const Duration(milliseconds: 500),
+        backoffPolicy: BackoffPolicy.linear,
+        existingWorkPolicy: ExistingWorkPolicy.append);
   }
 
   @override
@@ -103,39 +105,42 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
           title: const Text('Background Offline Data Synching'),
         ),
         body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Pref value: $_prefValue   ServerData length: $_serverValue",),
-                /*ValueListenableBuilder<Box<GithubRepos>>(
-                  valueListenable: BoxInstances().githubRepoBox!.listenable(),
-                  builder: (context, box, _) {
-                    final storages = box.values.toList().cast<GithubRepos>();
-                    return buildContent(storages);
-                  },
-                ),*/
-                ElevatedButton(
-                  onPressed: () async {
-                    await loadData();
-                  },
-                  child: const SizedBox(width: double.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await triggerOneOffTask();
-                  },
-                  child: const SizedBox(width: double.infinity, child: Text("Update Data From OneOff WM",textAlign: TextAlign.center)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await triggerPeriodicTask();
-                  },
-                  child: const SizedBox(width: double.infinity, child: Text("Update Data From Periodic WM",textAlign: TextAlign.center)),
-                ),
-              ],
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await loadData();
+                    },
+                    child: const SizedBox(width: double.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await triggerOneOffTask();
+                    },
+                    child: const SizedBox(width: double.infinity, child: Text("Update Data From OneOff WM",textAlign: TextAlign.center)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await triggerPeriodicTask();
+                    },
+                    child: const SizedBox(width: double.infinity, child: Text("Update Data From Periodic WM",textAlign: TextAlign.center)),
+                  ),
+                  Text("Pref value: $_prefValue   ServerData length: ${_serverData.length}",),
+                  buildContent(_serverData)
+                  /*ValueListenableBuilder<Box<GithubRepos>>(
+                    valueListenable: BoxInstances().githubRepoBox!.listenable(),
+                    builder: (context, box, _) {
+                      final storages = box.values.toList().cast<GithubRepos>();
+                      return buildContent(storages);
+                    },
+                  ),*/
+                ],
+              ),
             ),
           ),
         ));
@@ -144,7 +149,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContent(List<GithubRepos> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Text("${storages[i].items?[i]?.id}"));
+      textListView.add(Text("${storages[i].items?[i].timeStamp}"));
     }
     return Column(
      children: textListView,
