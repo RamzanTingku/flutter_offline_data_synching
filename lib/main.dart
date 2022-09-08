@@ -81,13 +81,13 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   }
 
   Future<void> triggerOneOffTask() async {
-    Workmanager().registerOneOffTask(TAG, "simpleOneOffTask",
-        existingWorkPolicy: ExistingWorkPolicy.append);
+    Workmanager().registerOneOffTask("simpleOneOffTask", "simpleOneOffTask",
+        existingWorkPolicy: ExistingWorkPolicy.replace);
   }
 
   Future<void> triggerPeriodicTask() async {
-    Workmanager().registerPeriodicTask(TAG, "simplePeriodicTask",
-        existingWorkPolicy: ExistingWorkPolicy.append);
+    Workmanager().registerPeriodicTask("simplePeriodicTask", "simplePeriodicTask",
+        existingWorkPolicy: ExistingWorkPolicy.replace);
   }
 
   @override
