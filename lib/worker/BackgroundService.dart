@@ -1,3 +1,4 @@
+import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
 import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
 import 'package:flutter_offline_data_synching/data/remotedb/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
@@ -15,6 +16,24 @@ class BackgroundService {
     await Workmanager().cancelAll();
     await Workmanager().initialize(callbackDispatcher);
   }
+}
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    //get data
+    await BoxInstances().initHive();
+    var serverDataCount = await saveGithubRepoDataFromServer();
+
+    //set count to pref
+    int prefValue = await BackGroundWork.instance.getPrefData();
+    await BackGroundWork.instance.savePrefData(prefValue+1);
+    int updatedPrefValue = await BackGroundWork.instance.getPrefData();
+
+    //show count to notification
+    NotificationService()
+        .showNotification(task, updatedPrefValue, serverDataCount.length);
+    return Future.value(true);
+  });
 }
 
 class BackGroundWork {

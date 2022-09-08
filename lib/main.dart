@@ -9,6 +9,9 @@ import 'package:flutter_offline_data_synching/data/model/githubuser/github_user.
 import 'package:flutter_offline_data_synching/data/remotedb/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
 import 'package:flutter_offline_data_synching/worker/BackgroundService.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'data/localdb/githubuserbox.dart';
@@ -21,24 +24,6 @@ Future<void> main() async {
   await BoxInstances().initHive();
   await BackgroundService.instance.init();
   runApp(const MyApp());
-}
-
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    //get data
-    await BoxInstances().initHive();
-    var serverDataCount = await saveGithubRepoDataFromServer();
-
-    //set count to pref
-    int prefValue = await BackGroundWork.instance.getPrefData();
-    await BackGroundWork.instance.savePrefData(prefValue+1);
-    int updatedPrefValue = await BackGroundWork.instance.getPrefData();
-
-    //show count to notification
-    NotificationService()
-        .showNotification(updatedPrefValue, serverDataCount.length);
-    return Future.value(true);
-  });
 }
 
 Future<List<GithubRepos>> saveGithubRepoDataFromServer() async {
@@ -88,14 +73,21 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   }
 
   Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     _prefValue = await BackGroundWork.instance.getPrefData();
     _serverValue = await GithubRepoBox().getAllData().then((value) => value.length);
     setState(() {});
   }
 
-  Future<void> triggerTask() async {
-    Workmanager().registerOneOffTask(TAG, "simplePeriodicTask",
-        existingWorkPolicy: ExistingWorkPolicy.replace);
+  Future<void> triggerOneOffTask() async {
+    Workmanager().registerOneOffTask(TAG, "simpleOneOffTask",
+        existingWorkPolicy: ExistingWorkPolicy.append);
+  }
+
+  Future<void> triggerPeriodicTask() async {
+    Workmanager().registerPeriodicTask(TAG, "simplePeriodicTask",
+        existingWorkPolicy: ExistingWorkPolicy.append);
   }
 
   @override
@@ -108,7 +100,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('BackGround Work Sample'),
+          title: const Text('Background Offline Data Synching'),
         ),
         body: Center(
           child: Padding(
@@ -129,14 +121,20 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
                   onPressed: () async {
                     await loadData();
                   },
-                  child: const SizedBox(width: double?.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
+                  child: const SizedBox(width: double.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await triggerTask();
+                    await triggerOneOffTask();
                   },
-                  child: const SizedBox(width: double?.infinity, child: Text("Update Data From Workmanager",textAlign: TextAlign.center)),
-                )
+                  child: const SizedBox(width: double.infinity, child: Text("Update Data From OneOff WM",textAlign: TextAlign.center)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await triggerPeriodicTask();
+                  },
+                  child: const SizedBox(width: double.infinity, child: Text("Update Data From Periodic WM",textAlign: TextAlign.center)),
+                ),
               ],
             ),
           ),

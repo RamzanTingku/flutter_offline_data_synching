@@ -14,10 +14,10 @@ class BoxInstances{
   Box<GithubRepos>? githubRepoBox;
   Box<GithubUser>? githubUserBox;
 
-  void closeBoxes(){
+  Future<void> closeBoxes() async {
     // githubRepoBox?.compact();
-    githubRepoBox?.close();
-    githubUserBox?.close();
-    Hive.close();
+    await githubRepoBox?.close();
+    await githubUserBox?.close();
+    await Hive.close();
   }
 }
