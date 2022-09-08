@@ -23,6 +23,24 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    //get data
+    await BoxInstances().initHive();
+    var serverDataCount = await saveGithubRepoDataFromServer();
+
+    //set count to pref
+    int prefValue = await BackGroundWork.instance.getPrefData();
+    await BackGroundWork.instance.savePrefData(prefValue+1);
+    int updatedPrefValue = await BackGroundWork.instance.getPrefData();
+
+    //show count to notification
+    NotificationService()
+        .showNotification(updatedPrefValue, serverDataCount.length);
+    return Future.value(true);
+  });
+}
+
 Future<List<GithubRepos>> saveGithubRepoDataFromServer() async {
   var repos = await Repository.getGithubRepos();
   await GithubRepoBox().add(repos);
@@ -66,16 +84,18 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   @override
   void initState() {
     super.initState();
-    Workmanager().registerPeriodicTask(TAG, "simplePeriodicTask",
-        initialDelay: const Duration(seconds: 1),
-        existingWorkPolicy: ExistingWorkPolicy.append);
     loadData();
   }
 
-  void loadData() async {
+  Future<void> loadData() async {
     _prefValue = await BackGroundWork.instance.getPrefData();
-    _serverValue = await GithubUserBox().getAllData().then((value) => value.length);
+    _serverValue = await GithubRepoBox().getAllData().then((value) => value.length);
     setState(() {});
+  }
+
+  Future<void> triggerTask() async {
+    Workmanager().registerOneOffTask(TAG, "simplePeriodicTask",
+        existingWorkPolicy: ExistingWorkPolicy.replace);
   }
 
   @override
@@ -91,21 +111,34 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
           title: const Text('BackGround Work Sample'),
         ),
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Pref value: $_prefValue   ServerData length: $_serverValue",),
-              /*ValueListenableBuilder<Box<GithubRepos>>(
-                valueListenable: BoxInstances().githubRepoBox!.listenable(),
-                builder: (context, box, _) {
-                  final storages = box.values.toList().cast<GithubRepos>();
-                  return buildContent(storages);
-                },
-              ),*/
-              ElevatedButton(onPressed: () async {
-                loadData();
-              }, child: const Text("Fetch"),)
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Pref value: $_prefValue   ServerData length: $_serverValue",),
+                /*ValueListenableBuilder<Box<GithubRepos>>(
+                  valueListenable: BoxInstances().githubRepoBox!.listenable(),
+                  builder: (context, box, _) {
+                    final storages = box.values.toList().cast<GithubRepos>();
+                    return buildContent(storages);
+                  },
+                ),*/
+                ElevatedButton(
+                  onPressed: () async {
+                    await loadData();
+                  },
+                  child: const SizedBox(width: double?.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await triggerTask();
+                  },
+                  child: const SizedBox(width: double?.infinity, child: Text("Update Data From Workmanager",textAlign: TextAlign.center)),
+                )
+              ],
+            ),
           ),
         ));
   }

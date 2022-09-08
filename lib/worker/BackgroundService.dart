@@ -12,24 +12,8 @@ class BackgroundService {
   static BackgroundService get instance => _instance;
 
   Future<void> init() async {
+    await Workmanager().cancelAll();
     await Workmanager().initialize(callbackDispatcher);
-  }
-
-  static void callbackDispatcher() {
-    Workmanager().executeTask((task, inputData) async {
-      //get data
-      var serverDataCount = await saveGithubRepoDataFromServer();
-
-      //set count to pref
-      int prefValue = await BackGroundWork.instance.getPrefData();
-      await BackGroundWork.instance.savePrefData(prefValue+1);
-      int updatedPrefValue = await BackGroundWork.instance.getPrefData();
-
-      //show count to notification
-      NotificationService()
-          .showNotification(updatedPrefValue, serverDataCount.length);
-      return Future.value(true);
-    });
   }
 }
 
