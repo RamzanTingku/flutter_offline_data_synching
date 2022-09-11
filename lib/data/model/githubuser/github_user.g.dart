@@ -60,19 +60,22 @@ class ItemsAdapter extends TypeAdapter<Items> {
       login: fields[0] as String?,
       id: fields[1] as int?,
       avatarUrl: fields[2] as String?,
+      timeStamp: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Items obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.login)
       ..writeByte(1)
       ..write(obj.id)
       ..writeByte(2)
-      ..write(obj.avatarUrl);
+      ..write(obj.avatarUrl)
+      ..writeByte(3)
+      ..write(obj.timeStamp);
   }
 
   @override

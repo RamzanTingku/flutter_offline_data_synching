@@ -55,13 +55,16 @@ class Items extends HiveObject{
   int? id;
   @HiveField(2)
   String? avatarUrl;
+  @HiveField(3)
+  String? timeStamp;
 
-  Items({this.login, this.id, this.avatarUrl});
+  Items({this.login, this.id, this.avatarUrl, this.timeStamp});
 
   Items.fromJson(Map<String, dynamic> json) {
     login = json['login'];
     id = json['id'];
     avatarUrl = json['avatar_url'];
+    timeStamp =  DateTime.now().toString();
   }
 
   Map<String, dynamic> toJson() {

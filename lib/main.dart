@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
+import 'package:flutter_offline_data_synching/background_services/task_registors.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
 import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
 import 'package:flutter_offline_data_synching/data/localdb/githubuserbox.dart';
@@ -27,18 +29,6 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-Future<List<GithubRepos>> saveGithubRepoDataFromServer() async {
-  var repos = await RemoteData.getGithubRepos();
-  await GithubRepoBox().add(repos);
-  return await GithubRepoBox().getAllData();
-}
-
-Future<List<GithubUser>> saveGithubUserDataFromServer() async {
-  var user = await RemoteData.getGithubUser();
-  await GithubUserBox().add(user);
-  return await GithubUserBox().getAllData();
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -63,8 +53,10 @@ class BackGroundWorkSample extends StatefulWidget {
 }
 
 class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
-  List<GithubRepos> _serverData = [];
-  int _prefValue = 0;
+  List<GithubRepos> _repoSavedData = [];
+  List<GithubUser> _userSavedData = [];
+  int _prefValueGithubRepo = 0;
+  int _prefValueGithubUser = 0;
   late StreamSubscription _loginSubscription;
 
   @override
@@ -76,21 +68,11 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
-    _prefValue = await PrefManager.instance.getPrefData();
-    _serverData = await GithubRepoBox().getAllData();
+    _prefValueGithubUser = await PrefManager.instance.getPrefData(PrefManager.GithubUserCount);
+    _prefValueGithubRepo = await PrefManager.instance.getPrefData(PrefManager.GithubRepoCount);
+    _repoSavedData = await GithubRepoBox().getAllData();
+    _userSavedData = await GithubUserBox().getAllData();
     setState(() {});
-  }
-
-  Future<void> triggerOneOffTask() async {
-    Workmanager().registerOneOffTask("simpleOneOffTask", "simpleOneOffTask",
-        existingWorkPolicy: ExistingWorkPolicy.append);
-  }
-
-  Future<void> triggerPeriodicTask() async {
-    Workmanager().registerPeriodicTask("simplePeriodicTask", "simplePeriodicTask",
-        initialDelay: const Duration(milliseconds: 500),
-        backoffPolicy: BackoffPolicy.linear,
-        existingWorkPolicy: ExistingWorkPolicy.append);
   }
 
   @override
@@ -119,27 +101,115 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
                     },
                     child: const SizedBox(width: double.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await triggerOneOffTask();
-                    },
-                    child: const SizedBox(width: double.infinity, child: Text("Update Data From OneOff WM",textAlign: TextAlign.center)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateRepoOnceWM();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo OneOff WM",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateRepoPeriodicWM();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo Periodic WM",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateRepoOnceBF();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo OneOff BF",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateRepoPeriodicBF();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo Periodic BF",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text("Pref value: $_prefValueGithubRepo   Saved Data length: ${_repoSavedData.length}",),
+                            buildContentForRepo(_repoSavedData),
+                            /*ValueListenableBuilder<Box<GithubRepos>>(
+                              valueListenable: BoxInstances().githubRepoBox!.listenable(),
+                              builder: (context, box, _) {
+                                final storages = box.values.toList().cast<GithubRepos>();
+                                return buildContent(storages);
+                              },
+                            ),*/
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateUserOnceWM();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github User OneOff WM",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateUserPeriodicWM();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github User Periodic WM",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateUserOnceBF();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github User OneOff BF",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      await TaskRegisters.updateUserPeriodicBF();
+                                    },
+                                    child: const SizedBox(width: double.infinity, child: Text("Github User Periodic BF",textAlign: TextAlign.center)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text("Pref value: $_prefValueGithubUser   Saved Data length: ${_userSavedData.length}",),
+                            buildContentForUser(_userSavedData)
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await triggerPeriodicTask();
-                    },
-                    child: const SizedBox(width: double.infinity, child: Text("Update Data From Periodic WM",textAlign: TextAlign.center)),
-                  ),
-                  Text("Pref value: $_prefValue   ServerData length: ${_serverData.length}",),
-                  buildContent(_serverData)
-                  /*ValueListenableBuilder<Box<GithubRepos>>(
-                    valueListenable: BoxInstances().githubRepoBox!.listenable(),
-                    builder: (context, box, _) {
-                      final storages = box.values.toList().cast<GithubRepos>();
-                      return buildContent(storages);
-                    },
-                  ),*/
                 ],
               ),
             ),
@@ -147,7 +217,17 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
         ));
   }
 
-  Widget buildContent(List<GithubRepos> storages) {
+  Widget buildContentForRepo(List<GithubRepos> storages) {
+    List<Widget> textListView = [];
+    for(int i=0; i<storages.length;i++){
+      textListView.add(Text("${storages[i].items?[i].timeStamp}"));
+    }
+    return Column(
+     children: textListView,
+    );
+  }
+
+  Widget buildContentForUser(List<GithubUser> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
       textListView.add(Text("${storages[i].items?[i].timeStamp}"));

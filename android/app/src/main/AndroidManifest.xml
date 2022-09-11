@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.flutter_offline_data_synching">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
+       tools:replace="android:label"
         android:label="flutter_offline_data_synching"
        android:usesCleartextTraffic="true"
         android:name="${applicationName}"
