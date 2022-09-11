@@ -1,6 +1,14 @@
 # flutter_offline_data_synching
 
-A new Flutter project.
+A new Flutter project on Offline Data Synching.
+
+Feature Includes:
+
+- Rest Api Calling
+- Hive Database
+- Workmanager
+- Local Notification
+- Repository Pattern
 
 ## Getting Started
 
