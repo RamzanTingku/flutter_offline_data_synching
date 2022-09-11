@@ -4,7 +4,7 @@ import 'package:flutter_offline_data_synching/data/model/githubrepo/github_repo.
 import 'package:flutter_offline_data_synching/data/model/githubuser/github_user.dart';
 import 'package:http/http.dart' as http;
 
-class Repository{
+class RemoteData{
   static Future<GithubRepos> getGithubRepos() async {
     final response = await http.get(Uri.parse('https://api.github.com/search/repositories?q=Android'));
     if (response.statusCode == 200) {

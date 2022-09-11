@@ -6,14 +6,15 @@ import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
 import 'package:flutter_offline_data_synching/data/localdb/githubuserbox.dart';
 import 'package:flutter_offline_data_synching/data/model/githubrepo/github_repo.dart';
 import 'package:flutter_offline_data_synching/data/model/githubuser/github_user.dart';
-import 'package:flutter_offline_data_synching/data/remotedb/repository.dart';
+import 'package:flutter_offline_data_synching/data/pref_manager/pref_manager.dart';
+import 'package:flutter_offline_data_synching/data/remotedb/remote_data.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
-import 'package:flutter_offline_data_synching/worker/BackgroundService.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'background_services/background_service.dart';
 import 'data/localdb/githubuserbox.dart';
 
 const String TAG = "BackGround_Work";
@@ -27,13 +28,13 @@ Future<void> main() async {
 }
 
 Future<List<GithubRepos>> saveGithubRepoDataFromServer() async {
-  var repos = await Repository.getGithubRepos();
+  var repos = await RemoteData.getGithubRepos();
   await GithubRepoBox().add(repos);
   return await GithubRepoBox().getAllData();
 }
 
 Future<List<GithubUser>> saveGithubUserDataFromServer() async {
-  var user = await Repository.getGithubUser();
+  var user = await RemoteData.getGithubUser();
   await GithubUserBox().add(user);
   return await GithubUserBox().getAllData();
 }
@@ -75,7 +76,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
-    _prefValue = await BackGroundWork.instance.getPrefData();
+    _prefValue = await PrefManager.instance.getPrefData();
     _serverData = await GithubRepoBox().getAllData();
     setState(() {});
   }
