@@ -20,19 +20,22 @@ class GithubUserAdapter extends TypeAdapter<GithubUser> {
       totalCount: fields[0] as int?,
       incompleteResults: fields[1] as bool?,
       items: (fields[2] as List?)?.cast<Items>(),
+      timeStamp: fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, GithubUser obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.totalCount)
       ..writeByte(1)
       ..write(obj.incompleteResults)
       ..writeByte(2)
-      ..write(obj.items);
+      ..write(obj.items)
+      ..writeByte(3)
+      ..write(obj.timeStamp);
   }
 
   @override
@@ -60,22 +63,19 @@ class ItemsAdapter extends TypeAdapter<Items> {
       login: fields[0] as String?,
       id: fields[1] as int?,
       avatarUrl: fields[2] as String?,
-      timeStamp: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Items obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.login)
       ..writeByte(1)
       ..write(obj.id)
       ..writeByte(2)
-      ..write(obj.avatarUrl)
-      ..writeByte(3)
-      ..write(obj.timeStamp);
+      ..write(obj.avatarUrl);
   }
 
   @override
