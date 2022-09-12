@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 part 'github_user.g.dart';
 
 @HiveType(typeId: 110)
@@ -9,8 +10,10 @@ class GithubUser extends HiveObject {
   bool? incompleteResults;
   @HiveField(2)
   List<Items>? items;
+  @HiveField(3)
+  late String timeStamp;
 
-  GithubUser({this.totalCount, this.incompleteResults, this.items});
+  GithubUser({this.totalCount, this.incompleteResults, this.items, required this.timeStamp});
 
   GithubUser.fromJson(Map<String, dynamic> json) {
     totalCount = json['total_count'];
@@ -21,6 +24,7 @@ class GithubUser extends HiveObject {
         items!.add(Items.fromJson(v));
       });
     }
+    timeStamp =  DateFormat('dd/MM HH:mm:ss').format(DateTime.now());
   }
 
   Map<String, dynamic> toJson() {
@@ -55,16 +59,13 @@ class Items extends HiveObject{
   int? id;
   @HiveField(2)
   String? avatarUrl;
-  @HiveField(3)
-  String? timeStamp;
 
-  Items({this.login, this.id, this.avatarUrl, this.timeStamp});
+  Items({this.login, this.id, this.avatarUrl});
 
   Items.fromJson(Map<String, dynamic> json) {
     login = json['login'];
     id = json['id'];
     avatarUrl = json['avatar_url'];
-    timeStamp =  DateTime.now().toString();
   }
 
   Map<String, dynamic> toJson() {

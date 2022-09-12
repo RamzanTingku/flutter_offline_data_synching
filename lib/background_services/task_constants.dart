@@ -11,4 +11,6 @@ class TaskConstants{
   static const UserPeriodicTaskWM = 'UserPeriodicTaskWM';
   static const RepoOneOffTaskWM = 'RepoOneOffTaskWM';
   static const RepoPeriodicTaskWM = 'RepoPeriodicTaskWM';
+
+  static const flutter_background_fetch = "flutter_background_fetch";
 }

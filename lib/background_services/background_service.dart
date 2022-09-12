@@ -1,16 +1,10 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
-import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
-import 'package:flutter_offline_data_synching/data/model/githubrepo/github_repo.dart';
 import 'package:flutter_offline_data_synching/data/pref_manager/pref_manager.dart';
-import 'package:flutter_offline_data_synching/data/remotedb/remote_data.dart';
 import 'package:flutter_offline_data_synching/data/repository/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
-import 'package:flutter_offline_data_synching/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:background_fetch/background_fetch.dart' as network;
 
 class BackgroundService {
   BackgroundService._privateConstructor();
@@ -73,14 +67,15 @@ Future<void> executeTask(String taskId) async {
     case TaskConstants.RepoPeriodicTaskWM:
     case TaskConstants.RepoOneOffTaskBF:
     case TaskConstants.RepoPeriodicTaskBF:
-      serverDataCount = getSavedDataCount(await Repository().getGithubRepos());
+    case TaskConstants.flutter_background_fetch:
+      serverDataCount = getSavedDataCount(await Repository().getGithubRepos(taskId));
       updatedPrefValue = await getPrefDataCount(PrefManager.GithubRepoCount);
       break;
     case TaskConstants.UserOneOffTaskWM:
     case TaskConstants.UserPeriodicTaskWM:
     case TaskConstants.UserOneOffTaskBF:
     case TaskConstants.UserPeriodicTaskBF:
-      serverDataCount = getSavedDataCount(await Repository().getGithubUser());
+      serverDataCount = getSavedDataCount(await Repository().getGithubUser(taskId));
       updatedPrefValue = await getPrefDataCount(PrefManager.GithubUserCount);
       break;
     case Workmanager.iOSBackgroundTask:

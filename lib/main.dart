@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
 import 'package:flutter_offline_data_synching/background_services/task_registors.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
 import 'package:flutter_offline_data_synching/data/localdb/githubrepobox.dart';
@@ -9,12 +8,8 @@ import 'package:flutter_offline_data_synching/data/localdb/githubuserbox.dart';
 import 'package:flutter_offline_data_synching/data/model/githubrepo/github_repo.dart';
 import 'package:flutter_offline_data_synching/data/model/githubuser/github_user.dart';
 import 'package:flutter_offline_data_synching/data/pref_manager/pref_manager.dart';
-import 'package:flutter_offline_data_synching/data/remotedb/remote_data.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 
 import 'background_services/background_service.dart';
 import 'data/localdb/githubuserbox.dart';
@@ -220,7 +215,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForRepo(List<GithubRepos> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Text("${storages[i].items?[i].timeStamp}"));
+      textListView.add(Text("${storages[i].timeStamp}"));
     }
     return Column(
      children: textListView,
@@ -230,7 +225,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForUser(List<GithubUser> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Text("${storages[i].items?[i].timeStamp}"));
+      textListView.add(Text("${storages[i].timeStamp}"));
     }
     return Column(
      children: textListView,
