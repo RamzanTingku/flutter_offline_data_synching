@@ -7,8 +7,13 @@ Feature Includes:
 - Rest Api Calling
 - Hive Database
 - Workmanager
+- Background Fetch
 - Local Notification
 - Repository Pattern
+
+To generate type adapters classes (DAO) for Hive: 
+
+    flutter packages pub run build_runner build --delete-conflicting-outputs
 
 ## Getting Started
 
