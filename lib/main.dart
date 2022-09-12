@@ -97,114 +97,100 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
                     child: const SizedBox(width: double.infinity, child: Text("Refresh", textAlign: TextAlign.center,)),
                   ),
                   Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateRepoOnceWM();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo OneOff WM",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateRepoPeriodicWM();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo Periodic WM",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateRepoOnceBF();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo OneOff BF",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateRepoPeriodicBF();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github Repo Periodic BF",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text("Pref value: $_prefValueGithubRepo   Saved Data length: ${_repoSavedData.length}",),
-                            buildContentForRepo(_repoSavedData),
-                            /*ValueListenableBuilder<Box<GithubRepos>>(
-                              valueListenable: BoxInstances().githubRepoBox!.listenable(),
-                              builder: (context, box, _) {
-                                final storages = box.values.toList().cast<GithubRepos>();
-                                return buildContent(storages);
-                              },
-                            ),*/
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateUserOnceWM();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github User OneOff WM",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateUserPeriodicWM();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github User Periodic WM",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateUserOnceBF();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github User OneOff BF",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      await TaskRegisters.updateUserPeriodicBF();
-                                    },
-                                    child: const SizedBox(width: double.infinity, child: Text("Github User Periodic BF",textAlign: TextAlign.center)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text("Pref value: $_prefValueGithubUser   Saved Data length: ${_userSavedData.length}",),
-                            buildContentForUser(_userSavedData)
-                          ],
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateRepoOnceWM();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("Repo OneOff WM",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateRepoPeriodicWM();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("Repo Periodic WM",textAlign: TextAlign.center)),
                         ),
                       ),
                     ],
                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateRepoOnceBF();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("Repo OneOff BF",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateRepoPeriodicBF();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("Repo Periodic BF",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text("Pref value: $_prefValueGithubRepo   Saved Data length: ${_repoSavedData.length}",),
+                  buildContentForRepo(_repoSavedData),
+                  /*ValueListenableBuilder<Box<GithubRepos>>(
+                          valueListenable: BoxInstances().githubRepoBox!.listenable(),
+                          builder: (context, box, _) {
+                            final storages = box.values.toList().cast<GithubRepos>();
+                            return buildContent(storages);
+                          },
+                        ),*/
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateUserOnceWM();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("User OneOff WM",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateUserPeriodicWM();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("User Periodic WM",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateUserOnceBF();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("User OneOff BF",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await TaskRegisters.updateUserPeriodicBF();
+                          },
+                          child: const SizedBox(width: double.infinity, child: Text("User Periodic BF",textAlign: TextAlign.center)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text("Pref value: $_prefValueGithubUser   Saved Data length: ${_userSavedData.length}",),
+                  buildContentForUser(_userSavedData)
                 ],
               ),
             ),
@@ -215,9 +201,15 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForRepo(List<GithubRepos> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start, maxLines: 1, overflow: TextOverflow.ellipsis)));
+      textListView.add(Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start)),
+        ],
+      ));
     }
     return Column(
+      mainAxisSize: MainAxisSize.min,
      children: textListView,
     );
   }
@@ -225,9 +217,14 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForUser(List<GithubUser> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start, maxLines: 1, overflow: TextOverflow.ellipsis)));
+      textListView.add(Row(
+        children: [
+          Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start)),
+        ],
+      ));
     }
     return Column(
+      mainAxisSize: MainAxisSize.min,
      children: textListView,
     );
   }
