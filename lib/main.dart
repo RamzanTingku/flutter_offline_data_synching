@@ -215,7 +215,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForRepo(List<GithubRepos> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Text("${storages[i].timeStamp}"));
+      textListView.add(Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start, maxLines: 1, overflow: TextOverflow.ellipsis)));
     }
     return Column(
      children: textListView,
@@ -225,7 +225,7 @@ class _BackGroundWorkSampleState extends State<BackGroundWorkSample> {
   Widget buildContentForUser(List<GithubUser> storages) {
     List<Widget> textListView = [];
     for(int i=0; i<storages.length;i++){
-      textListView.add(Text("${storages[i].timeStamp}"));
+      textListView.add(Expanded(child: Text(storages[i].timeStamp, textAlign: TextAlign.start, maxLines: 1, overflow: TextOverflow.ellipsis)));
     }
     return Column(
      children: textListView,
