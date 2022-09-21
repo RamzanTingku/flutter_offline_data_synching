@@ -1,9 +1,14 @@
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:background_fetch/background_fetch.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
 import 'package:flutter_offline_data_synching/data/pref_manager/pref_manager.dart';
 import 'package:flutter_offline_data_synching/data/repository/repository.dart';
 import 'package:flutter_offline_data_synching/local_notification/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 class BackgroundService {
@@ -28,14 +33,39 @@ class BackgroundService {
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
     ), backgroundFetchTask, backgroundFetchTimeout);
+    await initReceiverPortForOtherIsolates();
+  }
+
+  Future<void> initReceiverPortForOtherIsolates() async{
+    var port = ReceivePort();
+    if (IsolateNameServer.lookupPortByName('bChannel') != null) {
+      IsolateNameServer.removePortNameMapping('bChannel');
+    }
+    IsolateNameServer.registerPortWithName(port.sendPort, 'bChannel');
+    port.listen((dynamic taskId) async {
+      debugPrint('[Main][bChannel listener] got $taskId');
+      await executeTask(taskId);
+    });
   }
 }
 
 void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    await executeTask(task);
+  Workmanager().executeTask((taskId, inputData) async {
+    if(!triggerFromMainIfActive(taskId)){
+      await executeTask(taskId);
+    }
     return Future.value(true);
   });
+}
+
+bool triggerFromMainIfActive(String taskId) {
+  var sendPort = IsolateNameServer.lookupPortByName('bChannel');
+  if (sendPort != null) {
+    sendPort.send(taskId);
+    debugPrint("[Background] message $taskId sent.");
+    return true;
+  }
+  return false;
 }
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {

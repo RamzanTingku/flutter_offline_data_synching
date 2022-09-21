@@ -66,6 +66,7 @@ class TaskRegisters{
   static Future<void> updateRepoOnceWM() async {
     Workmanager().registerOneOffTask(TaskConstants.RepoOneOffTaskWM,
         TaskConstants.RepoOneOffTaskWM,
+        initialDelay: const Duration(seconds: 2),
         existingWorkPolicy: ExistingWorkPolicy.replace);
   }
 
