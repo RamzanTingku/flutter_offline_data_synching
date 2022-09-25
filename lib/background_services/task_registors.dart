@@ -1,10 +1,13 @@
 import 'package:background_fetch/background_fetch.dart';
+import 'package:background_fetch/background_fetch.dart' as bf;
 import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:workmanager/workmanager.dart' as wm;
 
 class TaskRegisters{
 
   static Future<void> updateUserOnceBF() async {
+
     await BackgroundFetch.scheduleTask(TaskConfig(
         taskId: TaskConstants.UserOneOffTaskBF,
         delay: 1000,
@@ -44,7 +47,7 @@ class TaskRegisters{
       periodic: true,
       forceAlarmManager: false,
       stopOnTerminate: false,
-      enableHeadless: true,
+      enableHeadless: true
     ));
   }
 
@@ -75,6 +78,13 @@ class TaskRegisters{
         TaskConstants.RepoPeriodicTaskWM,
         TaskConstants.RepoPeriodicTaskWM,
         initialDelay: const Duration(milliseconds: 500),
+        constraints: Constraints(
+            networkType: wm.NetworkType.connected,
+            requiresBatteryNotLow: true,
+            requiresCharging: true,
+            requiresDeviceIdle: true,
+            requiresStorageNotLow: true
+        ),
         backoffPolicy: BackoffPolicy.linear,
         existingWorkPolicy: ExistingWorkPolicy.replace);
   }

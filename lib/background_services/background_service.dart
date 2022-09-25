@@ -3,7 +3,9 @@ import 'dart:ui';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_offline_data_synching/background_services/backgroundfetch/backgroundfetch_service.dart';
 import 'package:flutter_offline_data_synching/background_services/task_constants.dart';
+import 'package:flutter_offline_data_synching/background_services/workmanager/workmanager_service.dart';
 import 'package:flutter_offline_data_synching/data/localdb/boxinstances.dart';
 import 'package:flutter_offline_data_synching/data/pref_manager/pref_manager.dart';
 import 'package:flutter_offline_data_synching/data/repository/repository.dart';
@@ -20,44 +22,26 @@ class BackgroundService {
   static BackgroundService get instance => _instance;
 
   Future<void> init() async {
-    await Workmanager().initialize(callbackDispatcher);
-    await BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-    await BackgroundFetch.configure(BackgroundFetchConfig(
-        minimumFetchInterval: 15,
-        forceAlarmManager: false,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        enableHeadless: true,
-        requiresBatteryNotLow: false,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresDeviceIdle: false,
-    ), backgroundFetchTask, backgroundFetchTimeout);
+    await WorkmanagerService.instance.init();
+    await BackgroundFetchService.instance.init();
     await initReceiverPortForOtherIsolates();
-  }
-
-  Future<void> initReceiverPortForOtherIsolates() async{
-    var port = ReceivePort();
-    if (IsolateNameServer.lookupPortByName('bChannel') != null) {
-      IsolateNameServer.removePortNameMapping('bChannel');
-    }
-    IsolateNameServer.registerPortWithName(port.sendPort, 'bChannel');
-    port.listen((dynamic taskId) async {
-      debugPrint('[Main][bChannel listener] got $taskId');
-      await executeTask(taskId);
-    });
   }
 }
 
-void callbackDispatcher() {
-  Workmanager().executeTask((taskId, inputData) async {
-    if(!triggerFromMainIfActive(taskId)){
-      await executeTask(taskId);
-    }
-    return Future.value(true);
+@pragma('vm:entry-point')
+Future<void> initReceiverPortForOtherIsolates() async{
+  var port = ReceivePort();
+  if (IsolateNameServer.lookupPortByName('bChannel') != null) {
+    IsolateNameServer.removePortNameMapping('bChannel');
+  }
+  IsolateNameServer.registerPortWithName(port.sendPort, 'bChannel');
+  port.listen((dynamic taskId) async {
+    debugPrint('[Main][bChannel listener] got $taskId');
+    await executeTask(taskId);
   });
 }
 
+@pragma('vm:entry-point')
 bool triggerFromMainIfActive(String taskId) {
   var sendPort = IsolateNameServer.lookupPortByName('bChannel');
   if (sendPort != null) {
@@ -68,43 +52,23 @@ bool triggerFromMainIfActive(String taskId) {
   return false;
 }
 
-void backgroundFetchHeadlessTask(HeadlessTask task) async {
-  var taskId = task.taskId;
-  var timeout = task.timeout;
-  if (timeout) {
-    BackgroundFetch.finish(taskId);
-    return;
-  }
-  await executeTask(taskId);
-  BackgroundFetch.finish(taskId);
-}
-
-void backgroundFetchTask(String taskId) async {
-  await executeTask(taskId);
-  BackgroundFetch.finish(taskId);
-}
-
-void backgroundFetchTimeout(String taskId) {
-  print("[BackgroundFetch] TIMEOUT: $taskId");
-  BackgroundFetch.finish(taskId);
-}
-
+@pragma('vm:entry-point')
 Future<void> executeTask(String taskId) async {
   await BoxInstances().initHive();
   int updatedPrefValue = 0, serverDataCount = 0;
   switch (taskId) {
     case TaskConstants.RepoOneOffTaskWM:
     case TaskConstants.RepoPeriodicTaskWM:
-    case TaskConstants.RepoOneOffTaskBF:
-    case TaskConstants.RepoPeriodicTaskBF:
-    case TaskConstants.flutter_background_fetch:
+    /*case TaskConstants.RepoOneOffTaskBF:
+    case TaskConstants.RepoPeriodicTaskBF:*/
       serverDataCount = getSavedDataCount(await Repository().getGithubRepos(taskId));
       updatedPrefValue = await getPrefDataCount(PrefManager.GithubRepoCount);
       break;
-    case TaskConstants.UserOneOffTaskWM:
-    case TaskConstants.UserPeriodicTaskWM:
+    /*case TaskConstants.UserOneOffTaskWM:
+    case TaskConstants.UserPeriodicTaskWM:*/
     case TaskConstants.UserOneOffTaskBF:
     case TaskConstants.UserPeriodicTaskBF:
+    case TaskConstants.flutter_background_fetch:
       serverDataCount = getSavedDataCount(await Repository().getGithubUser(taskId));
       updatedPrefValue = await getPrefDataCount(PrefManager.GithubUserCount);
       break;
